@@ -99,7 +99,7 @@ const handler = async (req, res) => {
     exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60)
   }
 
-  const token = jwt.sign(tokenContents, "KQya4EG7F9Z7EvFVIYsMcTd2OSzvOfvm_COspJXlzZS9ntFwZdhWfikN48YTSYDX");
+  const token = jwt.sign(tokenContents, "SYDX4EG7F9Z7EvFVIYsMcTd2OSzvOfvm_COspJXlzZS9ntFwZdhWfikN48YTSYDX");
 
   // success
   return res.json({
