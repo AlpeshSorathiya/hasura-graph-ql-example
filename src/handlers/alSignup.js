@@ -1,8 +1,9 @@
 const fetch = require("node-fetch")
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const url = 'http://localhost:8080/v1/graphql'
 
-const HASURA_OPERATION = `
+const HL_OPERATION = `
 mutation ($firstname: String!, $lastname: String!, $password: String!, $gender: String!) {
   insert_users_one(object: {
     firstname: $firstname,
@@ -15,7 +16,7 @@ mutation ($firstname: String!, $lastname: String!, $password: String!, $gender: 
 }
 `;
 
-const HASURA_OPERATION_SUB = `
+const HL_OPERATION_SUB = `
 mutation ($user_id: Int!, $lat: String!, $long: String!) {
   insert_users_tracking_one(object: {
     user_id: $user_id,
@@ -27,55 +28,55 @@ mutation ($user_id: Int!, $lat: String!, $long: String!) {
 }
 `;
 
-// execute the parent mutation in Hasura
-const execute = async (variables, reqHeaders) => {
-  const fetchResponse = await fetch(
-    "http://localhost:8080/v1/graphql",
+// methodExecute the parent mutation in Hasura
+const methodExecute = async (variables, reqHeaders) => {
+  const fetchRes = await fetch(
+    url,
     {
       method: 'POST',
       headers: reqHeaders || {},
       body: JSON.stringify({
-        query: HASURA_OPERATION,
+        query: HL_OPERATION,
         variables
       })
     }
   );
-  return await fetchResponse.json();
+  return await fetchRes.json();
 };
-  
-// execute the parent mutation in Hasura
-const execute_sub = async (variables, reqHeaders) => {
+
+// methodExecute the  parent mutation in Hasura
+const methodExecuteSub = async (variables, reqHeaders) => {
   console.log(variables);
-  const fetchResponse = await fetch(
-    "http://localhost:8080/v1/graphql",
+  const fetchRes = await fetch(
+    url,
     {
       method: 'POST',
       headers: reqHeaders || {},
       body: JSON.stringify({
-        query: HASURA_OPERATION_SUB,
+        query: HL_OPERATION_SUB,
         variables
       })
     }
   );
-  return await fetchResponse.json();
+  return await fetchRes.json();
 };
 
 // Request Handler
-const handler = async (req, res) => {
+const alHandler = async (req, res) => {
 
   // get request input
-  const { firstname, lastname, password, gender, lat, long} = req.body.input;
+  const { firstname, lastname, password, gender, lat, long } = req.body.input;
 
   // run some business logic
   let hashedPassword = await bcrypt.hash(password, 10);
 
-  // execute the Hasura operation
-  const { data, errors } = await execute({ firstname, lastname, password: hashedPassword, gender }, req.headers);
+  // methodExecute the Hasura operation
+  const { data, errors } = await methodExecute({ firstname, lastname, password: hashedPassword, gender }, req.headers);
 
   const user_id = data.insert_users_one.id
-   
-  // execute the Hasura operation
-  const { data : data_sub, errors: errors_sub } = await execute_sub({ user_id, lat, long }, req.headers);
+
+  // methodExecute the Hasura operation
+  const { data: data_sub, errors: errors_sub } = await methodExecuteSub({ user_id, lat, long }, req.headers);
 
   // if Hasura operation errors, then throw error
   if (errors || errors_sub) {
@@ -83,7 +84,7 @@ const handler = async (req, res) => {
       message: errors?.message || errors_sub?.message
     })
   }
-  
+
 
   const tokenContents = {
     sub: data.insert_users_one.id.toString(),
@@ -109,4 +110,4 @@ const handler = async (req, res) => {
 
 }
 
-module.exports = handler;
+module.exports = alHandler;

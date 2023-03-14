@@ -9,13 +9,13 @@ app.use(bodyParser.json());
 
 app.post('/:route', (req, res) => {
   try {
-    const handler = require(`./handlers/${req.params.route}`);
-    if (!handler) {
+    const alHandler = require(`./handlers/${req.params.route}`);
+    if (!alHandler) {
       return res.status(404).json({
         message: `not found`
       });
     }
-    return handler(req, res);
+    return alHandler(req, res);
   } catch (e) {
     console.error(e);
     return res.status(500).json({

@@ -1,8 +1,8 @@
 const fetch = require("node-fetch")
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const url = 'http://localhost:8080/v1/graphql'
 
-const HASURA_OPERATION = `
+const HL_OPERATION = `
 query GetUsersTracking {
   users_tracking {
     id,
@@ -12,36 +12,36 @@ query GetUsersTracking {
 `;
 
 
-// execute the parent mutation in Hasura
-const execute = async (reqHeaders) => {
-  const fetchResponse = await fetch(
-    "http://localhost:8080/v1/graphql",
+// methodExecute the parent mutation in Hasura
+const methodExecute = async (reqHeaders) => {
+  const fetchRes = await fetch(
+    url,
     {
       method: 'POST',
       headers: reqHeaders || {},
       body: JSON.stringify({
-        query: HASURA_OPERATION
+        query: HL_OPERATION
       })
     }
   );
-  return await fetchResponse.json();
+  return await fetchRes.json();
 };
   
  
 // Request Handler
-const handler = async (req, res) => {
+const alHandler = async (req, res) => {
 
   // get request input
   const { radios} = req.body.input;
 
    
-  // execute the Hasura operation
-  const { data, errors } = await execute(req.headers);
+  // methodExecute the Hasura operation
+  const { data, errors } = await methodExecute(req.headers);
 
   const user_id = data.insert_users_one.id
    
-  // execute the Hasura operation
-  const { data : data_sub, errors: errors_sub } = await execute_sub({ user_id, lat, long }, req.headers);
+  // methodExecute the Hasura operation
+  const { data : data_sub, errors: errors_sub } = await methodExecuteSub({ user_id, lat, long }, req.headers);
 
   // GEO Location logic {
     // and return data
@@ -62,4 +62,4 @@ const handler = async (req, res) => {
 
 }
 
-module.exports = handler;
+module.exports = alHandler;
